@@ -1,0 +1,121 @@
+<!-- Chat Widget Button -->
+    <button id="chat-widget-button">💬</button>
+
+    <!-- Chat Widget -->
+    <div id="chat-widget-container">
+        <div id="chat-widget-header">
+            <span>แชทกับเรา</span>
+            <button onclick="closeChatWidget()">✖</button>
+        </div>
+        <div id="chat-widget-body">
+            <p style="margin-bottom: 20px;"><strong>สวัสดีครับ 👋 มีอะไรให้ช่วยไหมครับ?</strong></p>
+        </div>
+        <div id="chat-widget-footer">
+            <input type="text" id="chat-widget-input" placeholder="พิมพ์ข้อความของคุณที่นี่...">
+            <button id="chat-widget-send">ส่ง</button>
+        </div>
+    </div>
+
+    <!-- Chat Widget Script -->
+    <script>
+        window.ChatWidgetConfig = {
+            webhook: {
+                url: 'WEBHOOK_URL',
+                route: 'general'
+            },
+            style: {
+                primaryColor: '#3498db',
+                secondaryColor: '#2c3e50',
+                position: 'right',
+                backgroundColor: '#ffffff',
+                fontColor: '#333333'
+            }
+        };
+
+        // Function to generate or retrieve a unique chat ID
+        function getChatId() {
+            let chatId = sessionStorage.getItem("chatId");
+            if (!chatId) {
+                chatId = "chat_" + Math.random().toString(36).substr(2, 9); // Unique ID
+                sessionStorage.setItem("chatId", chatId);
+            }
+            return chatId;
+        }
+
+        // Show chat widget and hide bubble
+        document.getElementById("chat-widget-button").addEventListener("click", function() {
+            document.getElementById("chat-widget-container").style.display = "flex";
+            document.getElementById("chat-widget-button").style.display = "none";
+        });
+
+        // Close chat widget and show bubble
+        function closeChatWidget() {
+            document.getElementById("chat-widget-container").style.display = "none";
+            document.getElementById("chat-widget-button").style.display = "flex";
+        }
+
+        // Send message to n8n webhook
+        document.getElementById("chat-widget-send").addEventListener("click", function() {
+            let message = document.getElementById("chat-widget-input").value;
+            if (message.trim() === "") return;
+
+            let chatBody = document.getElementById("chat-widget-body");
+            let newMessage = document.createElement("p");
+            newMessage.textContent = message;
+            newMessage.style.color = "#333";
+            newMessage.style.background = "#f1f1f1";
+            chatBody.appendChild(newMessage);
+
+            let chatId = getChatId(); // Retrieve the session chat ID
+
+            fetch(window.ChatWidgetConfig.webhook.url, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    chatId: chatId,  // Attach chat ID for memory tracking
+                    chatInput: message,
+                    route: window.ChatWidgetConfig.webhook.route
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('การยืนยันตัวตนล้มเหลว (401 Unauthorized)');
+                    } else {
+                        throw new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + response.status);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                let botMessage = document.createElement("p");
+                botMessage.innerHTML = data.output || "ขออภัย ฉันไม่เข้าใจคำถามนั้น";
+                botMessage.style.color = "#fff";
+                botMessage.style.background = window.ChatWidgetConfig.style.primaryColor;
+                botMessage.style.marginTop = "10px";
+                chatBody.appendChild(botMessage);
+                
+                // Auto-scroll to the bottom of the chat
+                chatBody.scrollTop = chatBody.scrollHeight;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                let errorMessage = document.createElement("p");
+                errorMessage.textContent = "เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง";
+                errorMessage.style.color = "#fff";
+                errorMessage.style.background = "#e74c3c";
+                chatBody.appendChild(errorMessage);
+            });
+
+            document.getElementById("chat-widget-input").value = "";
+        });
+        
+        // Send message when pressing Enter key
+        document.getElementById("chat-widget-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                document.getElementById("chat-widget-send").click();
+            }
+        });
+    </script>
