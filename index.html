@@ -1,0 +1,404 @@
+
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>เว็บไซต์ของฉัน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/geist-font/1.0.0/fonts/geist-sans/style.min.css">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Sarabun", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f9f9f9;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .nav-links {
+        display: flex;
+        list-style: none;
+      }
+
+      .nav-links li {
+        margin-left: 20px;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .nav-links a:hover {
+        color: #3498db;
+      }
+
+      .hero {
+        background-color: #3498db;
+        color: white;
+        text-align: center;
+        padding: 4rem 0;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+      }
+
+      .btn {
+        display: inline-block;
+        background-color: #2c3e50;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #1a252f;
+      }
+
+      .features {
+        padding: 4rem 0;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .feature-card {
+        background-color: white;
+        border-radius: 5px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .feature-card h3 {
+        margin: 1rem 0;
+        color: #2c3e50;
+      }
+
+      footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 2rem 0;
+        text-align: center;
+      }
+
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      
+      /* Chat Widget Styling */
+      #chat-widget-container {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          width: 350px;
+          height: 500px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          display: none;
+          flex-direction: column;
+          z-index: 1000;
+          overflow: hidden;
+      }
+      #chat-widget-header {
+          background: #854fff;
+          color: white;
+          padding: 20px;
+          font-weight: bold;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 18px;
+      }
+      #chat-widget-body {
+          flex: 1;
+          padding: 20px;
+          overflow-y: auto;
+      }
+      /* Increased spacing between messages */
+      #chat-widget-body p {
+          margin-bottom: 15px; /* Adjust spacing between messages */
+          padding: 12px;
+          border-radius: 8px;
+          font-size: 14px;
+          word-wrap: break-word;
+      }
+      #chat-widget-footer {
+          padding: 12px;
+          border-top: 1px solid #ddd;
+          display: flex;
+          gap: 10px;
+      }
+      #chat-widget-input {
+          flex: 1;
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          outline: none;
+      }
+      #chat-widget-send {
+          background: #854fff;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+      }
+      /* Make the chat bubble a perfect circle */
+      #chat-widget-button {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: #854fff;
+          color: white;
+          border: none;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 20px;
+          z-index: 1001;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <nav>
+          <div class="logo">เว็บไซต์ของฉัน</div>
+          <ul class="nav-links">
+            <li><a href="#">หน้าแรก</a></li>
+            <li><a href="#">เกี่ยวกับเรา</a></li>
+            <li><a href="#">บริการ</a></li>
+            <li><a href="#">ติดต่อ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <h1>ยินดีต้อนรับสู่เว็บไซต์ของเรา</h1>
+        <p>
+          เว็บไซต์นี้ถูกออกแบบอย่างเรียบง่ายและทันสมัย
+          เพื่อให้คุณสามารถใช้งานได้อย่างสะดวกและรวดเร็ว
+        </p>
+        <a href="#" class="btn">เรียนรู้เพิ่มเติม</a>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 1rem">บริการของเรา</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>บริการที่ 1</h3>
+            <p>
+              รายละเอียดเกี่ยวกับบริการที่ 1 ของเรา
+              ที่จะช่วยให้คุณประสบความสำเร็จ
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>บริการที่ 2</h3>
+            <p>
+              รายละเอียดเกี่ยวกับบริการที่ 2 ของเรา
+              ที่จะช่วยให้คุณประสบความสำเร็จ
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>บริการที่ 3</h3>
+            <p>
+              รายละเอียดเกี่ยวกับบริการที่ 3 ของเรา
+              ที่จะช่วยให้คุณประสบความสำเร็จ
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <p>&copy; 2025 เว็บไซต์ของฉัน. สงวนลิขสิทธิ์ทั้งหมด.</p>
+      </div>
+    </footer>
+
+    <!-- Chat Widget Button -->
+    <button id="chat-widget-button">💬</button>
+
+    <!-- Chat Widget -->
+    <div id="chat-widget-container">
+        <div id="chat-widget-header">
+            <span>แชทกับเรา</span>
+            <button onclick="closeChatWidget()">✖</button>
+        </div>
+        <div id="chat-widget-body">
+            <p style="margin-bottom: 20px;"><strong>สวัสดีครับ 👋 มีอะไรให้ช่วยไหมครับ?</strong></p>
+        </div>
+        <div id="chat-widget-footer">
+            <input type="text" id="chat-widget-input" placeholder="พิมพ์ข้อความของคุณที่นี่...">
+            <button id="chat-widget-send">ส่ง</button>
+        </div>
+    </div>
+
+    <!-- Chat Widget Script -->
+    <script>
+        window.ChatWidgetConfig = {
+            webhook: {
+                url: 'WEBHOOK_URL',
+                route: 'general'
+            },
+            style: {
+                primaryColor: '#3498db',
+                secondaryColor: '#2c3e50',
+                position: 'right',
+                backgroundColor: '#ffffff',
+                fontColor: '#333333'
+            }
+        };
+
+        // Function to generate or retrieve a unique chat ID
+        function getChatId() {
+            let chatId = sessionStorage.getItem("chatId");
+            if (!chatId) {
+                chatId = "chat_" + Math.random().toString(36).substr(2, 9); // Unique ID
+                sessionStorage.setItem("chatId", chatId);
+            }
+            return chatId;
+        }
+
+        // Show chat widget and hide bubble
+        document.getElementById("chat-widget-button").addEventListener("click", function() {
+            document.getElementById("chat-widget-container").style.display = "flex";
+            document.getElementById("chat-widget-button").style.display = "none";
+        });
+
+        // Close chat widget and show bubble
+        function closeChatWidget() {
+            document.getElementById("chat-widget-container").style.display = "none";
+            document.getElementById("chat-widget-button").style.display = "flex";
+        }
+
+        // Send message to n8n webhook
+        document.getElementById("chat-widget-send").addEventListener("click", function() {
+            let message = document.getElementById("chat-widget-input").value;
+            if (message.trim() === "") return;
+
+            let chatBody = document.getElementById("chat-widget-body");
+            let newMessage = document.createElement("p");
+            newMessage.textContent = message;
+            newMessage.style.color = "#333";
+            newMessage.style.background = "#f1f1f1";
+            chatBody.appendChild(newMessage);
+
+            let chatId = getChatId(); // Retrieve the session chat ID
+
+            fetch(window.ChatWidgetConfig.webhook.url, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    chatId: chatId,  // Attach chat ID for memory tracking
+                    chatInput: message,
+                    route: window.ChatWidgetConfig.webhook.route
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('การยืนยันตัวตนล้มเหลว (401 Unauthorized)');
+                    } else {
+                        throw new Error('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + response.status);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                let botMessage = document.createElement("p");
+                botMessage.innerHTML = data.output || "ขออภัย ฉันไม่เข้าใจคำถามนั้น";
+                botMessage.style.color = "#fff";
+                botMessage.style.background = window.ChatWidgetConfig.style.primaryColor;
+                botMessage.style.marginTop = "10px";
+                chatBody.appendChild(botMessage);
+                
+                // Auto-scroll to the bottom of the chat
+                chatBody.scrollTop = chatBody.scrollHeight;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                let errorMessage = document.createElement("p");
+                errorMessage.textContent = "เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง";
+                errorMessage.style.color = "#fff";
+                errorMessage.style.background = "#e74c3c";
+                chatBody.appendChild(errorMessage);
+            });
+
+            document.getElementById("chat-widget-input").value = "";
+        });
+        
+        // Send message when pressing Enter key
+        document.getElementById("chat-widget-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                document.getElementById("chat-widget-send").click();
+            }
+        });
+    </script>
+  </body>
+</html>
