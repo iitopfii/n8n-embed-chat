@@ -1,0 +1,373 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_5KH6H_wFTrmKcrGzsBEsG6uM8EDm0suzuB2lXcadYw",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        272,
+        0
+      ],
+      "id": "f07ea8b8-0d8c-4412-96fe-11d3917f250f",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "M3AUDi1hUEG9Gh7k",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ดึงข้อมูล question และ answer จาก items\nconst data = items.map(item => item.json);\n\n// รวมข้อความทั้งหมดเป็นข้อความเดียว\nconst combinedText = data\n  .map(entry => `คำถาม: ${entry.question}\\nคำตอบ: ${entry.answer}`)\n  .join('\\n\\n');\n\n// ดึง input message และ session ID จาก Trigger node\nconst chatInput = $('Line').first().json.body.events[0].message.text\nconst sessionId = $('Line').first().json.body.events[0].replyToken\n\n// ส่งออกข้อมูล\nreturn [\n  {\n    json: {\n      combinedText,\n      q: chatInput,\n      s: sessionId\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        0
+      ],
+      "id": "ef9dbd35-507d-42bb-ae56-260f81ffce92",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=ผู้ใช้ถามว่า:{{ $json.q }}\nข้อมูลที่เกี่ยวข้อง:\n{{ $json.combinedText }}\nกรุณาตอบคำถามโดยใช้ข้อมูลข้างต้น และห้ามใช้คำว่า \"จากข้อมูลที่ให้มา\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        768,
+        0
+      ],
+      "id": "abd41da4-f212-4c38-a902-bda1a9db9434",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        240
+      ],
+      "id": "e40cefca-4028-4aa0-9307-fe752b50886b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9xs4QlD7qTYS5SLc",
+          "name": "Google Gemini API Flash"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.s }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        864,
+        240
+      ],
+      "id": "edaa2f8f-9323-4aa5-bcab-54dbd4979329",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "get-text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        32
+      ],
+      "id": "b4397fed-762d-4a07-ad92-ed014d555dd6",
+      "name": "Line",
+      "webhookId": "e3624853-8e90-4568-b1a7-dc623913513f"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Code').item.json.s }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{$json.output.replace(/\\\"/g, '\\\\\"').replace(/\\n/g, '\\\\n')}}\",\n      \"quickReply\": {\n        \"items\": [\n          {\n            \"type\": \"action\",\n            \"imageUrl\": \"https://cdn-icons-png.flaticon.com/512/5521/5521277.png\",\n            \"action\": {\n              \"type\": \"message\",\n              \"label\": \"เวลาทำการ\",\n              \"text\": \"เวลาทำการ?\"\n            }\n          },\n          {\n            \"type\": \"action\",\n            \"imageUrl\": \"https://png.pngtree.com/png-vector/20230213/ourmid/pngtree-circle-phone-call-icon-in-black-color-png-image_6596895.png\",\n            \"action\": {\n              \"type\": \"message\",\n              \"label\": \"ติดต่อเรา\",\n              \"text\": \"ติดต่อเรา\"\n            }\n          },\n          {\n            \"type\": \"action\",\n            \"imageUrl\": \"https://cdn-icons-png.flaticon.com/512/564/564619.png\",\n            \"action\": {\n              \"type\": \"message\",\n              \"label\": \"แจ้งเหตุ\",\n              \"text\": \"แจ้งเหตุ\"\n            }\n          },\n          {\n            \"type\": \"action\",\n            \"action\": {\n              \"type\": \"location\",\n              \"label\": \"Send location\"\n            }\n          }\n        ]\n      }\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "51e247f4-4bb0-4cb2-b99e-c8c3bb806119",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZQqrAhQjxAIFlMSX",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "2d52542a-62a0-4194-ae26-620df6cb1447",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ JSON.stringify($json.body).replace(\n/([\\u2700-\\u27BF]|[\\uE000-\\uF8FF]|\\uD83C[\\uDC00-\\uDFFF]|\\uD83D[\\uDC00-\\uDFFF]|[\\u2011-\\u26FF]|\\uD83E[\\uDD10-\\uDDFF])/g,\n(e) => {\nreturn (\n'\\\\u' +\ne.charCodeAt(0).toString(16).toUpperCase() +\n'\\\\u' +\ne.charCodeAt(1).toString(16).toUpperCase()\n);\n}\n) }}",
+        "secret": "e4f24a486a050d54abdd50e73b75831a",
+        "encoding": "base64"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        32
+      ],
+      "id": "1d699cfd-70e9-495a-ac20-6c7fe78d84e8",
+      "name": "Crypto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bd9bfcf9-a0f1-4ffe-b2cb-cf9941c4a420",
+              "leftValue": "={{ $json.headers['x-line-signature'] }}",
+              "rightValue": "={{ $json.data }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f0642927-f8d3-41f3-bc69-6c5b53cf94f5",
+              "leftValue": "={{ $json.body.events[0].message.text }}",
+              "rightValue": "แจ้งเหตุ",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        32
+      ],
+      "id": "57311e3c-4e83-4a53-b3ef-dbd9fb35cdf1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "## Line Chat AI",
+        "height": 480,
+        "width": 2080
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -80
+      ],
+      "id": "ede70d84-697f-4768-888b-746ba779dd2d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"คุณสามารถแจ้งเหตุได้ที่ลิงค์นี้\\n https://liff.line.me/2007466562-pnPjzLGn\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        224
+      ],
+      "id": "aad10183-4116-4817-9175-3f65432bef02",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZQqrAhQjxAIFlMSX",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Line": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fdc6eb5f329c392aee54444bebeca26608ba397dcf7fd158f9bfe839007555b"
+  }
+}
