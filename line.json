@@ -1,0 +1,9 @@
+{
+  "replyToken": "{{ $('Code').item.json.s }}",
+  "messages": [
+    {
+      "type": "text",
+      "text": "{{$json.output.replace(/\"/g, '\\"').replace(/\n/g, '\\n')}}"
+    }
+  ]
+}
